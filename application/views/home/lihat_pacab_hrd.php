@@ -1,0 +1,296 @@
+<?php $this->load->view('layout/header.php');?>
+<!-- <meta http-equiv="refresh" content="120"> -->
+    <div class="wrapper">
+        <?php $this->load->view('layout/sidebar.php')?>
+        <div id="content" class="content text-center" style="">
+            <?php $this->load->view('layout/top_menu.php');?>
+            <?php $msg = $this->session->flashdata('msg');
+                if(isset($msg)){echo $this->session->flashdata('msg');$this->session->unset_userdata('msg');}?>
+            <!--<div class="container-fluid" style="background: #f2f2f2;position: relative; min-height: 76vh;">-->
+            <div class="container-fluid rounded shadow" style="background: #f7fdfc;position: relative; height: 82vh;overflow-y:scroll" id="konten">
+                <div class="row pt-3 pl-3 pr-3">
+                    <div class="col-md-3 text-left">
+                    <a href="javascript: history.go(-1)" class="btn btn-sm btn-secondary" onclick="loader()"><i class="fas fa-chevron-left"></i> Kembali</a>&ensp;
+                        <a href="<?php echo base_url('pa/formPerformanceHRD/'.$this->uri->segment(3).'/'.$this->uri->segment(4));?>" class="btn btn-sm btn-secondary" onclick="loader()"><i class="fas fa-sync"></i></a>
+                        <?php if($this->session->userdata('level') == '240' || $this->session->userdata('level') == "210"){?>
+                        <a href="javascript:;" data-toggle="modal" data-placement="bottom" title="TAMBAH PENILAIAN" data-target="#tambah-penilaian" class="btn btn-sm btn-success"><i class="fas fa-plus"></i></a>
+                        <?php } ?>
+                    </div>
+                    <div class="col-md-6"><h4>LIST FORM PERFORMANCE APPRAISAL KARYAWAN</h4></div>
+                    <div class="col-md-3 text-right">
+                        <a href="javascript:;" data-toggle="modal" data-placement="bottom" title="INFO NILAI" data-target="#info-nilai" class="btn btn-sm btn-tosca"><i class="fas fa-question-circle"></i></a>
+                    </div>
+                </div>
+
+                <div class="row pt-3 pl-3 pr-3">
+                    <div class="col-md-3 text-left">
+
+                    </div>
+                    <div class="col-md-6">
+                        <!-- <form method="GET" action="<?php echo base_url('pa/formPerformanceHRD/'.$this->uri->segment(2))?>" target="_blank" name="cari">
+                            <div class="form-group row">
+                                <div class="col-md-5">
+                                    <select class="form-control form-control-md" id="cabang"name="cabang">
+                                        <option value=""  <?php if($cabs == 'ALL' || $cabs == ''){ echo 'selected'; }?>>--PILIH CABANG--</option>
+                                        <?php foreach($cabang as $d){?>
+                                            <option value="<?php echo $d->kode_cabang;?> <?php if($d->kode_cabang == $cabs){echo "selected";}?>"><?php echo $d->kode_cabang.'-'.$d->nama_cabang;?></option>
+                                        <?php }?>
+                                    </select>
+                                    </div>  
+                                    <div class="col-md-2 text-center">
+                                        <button type="submit" class="btn btn-secondary btn-sm">Cari </button>
+                                    </div> 
+                                </div>
+                        </form> -->
+                    </div>
+
+                    <div class="col-md-3 text-right">
+                    </div>
+                </div>
+                <div class="table-responsive rounded pl-3 pr-3 pt-2">
+                    <table class="table table-bordered table-hover table-sm shadow" id="table" style="border: 2px solid !important; font-size: 12px">
+                        <thead>
+                            <tr>
+                                <th class="bg-nobby text-light" style="width: 5%; border: 1px solid #000;">NO <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">KODE PA <i class="fas fa-sort"></i></th> 
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">KODE CABANG <i class="fas fa-sort"></i></th>                                
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">JENIS PA <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">NIK  <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 15%; border: 1px solid #000;">NAMA <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 10%; border: 1px solid #000;">TGL PENILAIAN <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 10%; border: 1px solid #000;">PERIODE <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">NILAI PA <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">NILAI KPI <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">NILAI PA & KPI <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">NILAI <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 8%; border: 1px solid #000;">STATUS <i class="fas fa-sort"></i></th>
+                                <th class="bg-nobby text-light" style="width: 10%; border: 1px solid #000;">OPSI</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $no = 1;
+                            if(empty($header)){?>
+                                <tr><td colspan="13">DATA TIDAK DITEMUKAN</td></tr>
+                            <?php }else{
+                                foreach($header as $header){
+                                    $date_now = date_create($header->tgl_periode2);
+                                    $date_gabung = date_create($header->tgl_gabung);
+                                    $masa_kerja = date_diff($date_now,$date_gabung);
+                                    $bulan = $masa_kerja->m;
+                                    $tahun = $masa_kerja->y;
+                                    // if ($header->status_process == 1 AND $header->status_confirmed == 0) {
+                                    //     $status ='PROCESS';
+                                    // }elseif($header->status_confirmed == 1 AND $header->status_agree == 0){
+                                    //     $status ='CONFIRMED';
+                                    // }elseif($header->status_agree == 1 AND $header->status_accepted == 0){
+                                    //     $status ='AGREE';
+                                    // }elseif($header->status_accepted == 1 AND $header->status_approved == 0) {
+                                    //     $status ='ACCEPTED';
+                                    // }elseif($header->status_approved == 1){
+                                    //     $status ='APPROVED';
+                                    // }
+
+                                    if($header->nilai_ratarata <= 100 and $header->nilai_ratarata > 89){
+                                        $nilai ='A';
+                                    }elseif($header->nilai_ratarata <= 89 and $header->nilai_ratarata > 78){
+                                        $nilai = 'B';
+                                    }elseif($header->nilai_ratarata <= 78 and $header->nilai_ratarata > 67){
+                                        $nilai = 'C';
+                                    }elseif($header->nilai_ratarata <= 67 and $header->nilai_ratarata > 56){
+                                        $nilai = 'D';
+                                    }elseif($header->nilai_ratarata <= 56 and $header->nilai_ratarata > 45){
+                                        $nilai = 'E';
+                                    }else{
+                                        $nilai = '';
+                                    }
+
+                                    $nilai_pa_kpi = floor(($header->nilai_ratarata * 40/100) + ($header->nilai_kpi * 60/100));
+
+                                    if($nilai_pa_kpi <= 100 and $nilai_pa_kpi > 89){
+                                        $nilai ='A';
+                                    }elseif($nilai_pa_kpi <= 89 and $nilai_pa_kpi > 78){
+                                        $nilai = 'B';
+                                    }elseif($nilai_pa_kpi <= 78 and $nilai_pa_kpi > 67){
+                                        $nilai = 'C';
+                                    }elseif($nilai_pa_kpi <= 67 and $nilai_pa_kpi > 56){
+                                        $nilai = 'D';
+                                    }elseif($nilai_pa_kpi <= 56 and $nilai_pa_kpi > 45){
+                                        $nilai = 'E';
+                                    }else{
+                                        $nilai = '';
+                                    }
+                            ?>
+                            <tr>
+                                <td style="border: 1px solid #000;"><?php echo $no++;?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->kode_pa;?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->kode_cabang;?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->jenis_pa;?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->nik?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->nama?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->tgl_penilaian?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->periode?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->nilai_ratarata?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->nilai_kpi?></td>
+                                <td style="border: 1px solid #000;"><?php echo $nilai_pa_kpi?></td>
+                                <td style="border: 1px solid #000;"><?php echo $nilai?></td>
+                                <td style="border: 1px solid #000;"><?php echo $header->status?></td>
+                                <td style="border: 1px solid #000;">
+                                    <a href="<?php echo base_url('pa/lihatDetailKaryawan/'.$header->kode_pa)?>" class="btn <?php if($header->status == "CONFIRMED SOH" || $header->status == "PROCESS"){echo "btn-success";}else{echo"btn-secondary";}?> btn-xs">D</a>
+                                    <?php if($header->status == 'PROCESS' && $header->user_input == $header->nik){?>
+                                    <!-- <a href="<?php echo base_url('pa/hapusForm/'.$header->id.'/'.$header->kode_pa)?>" class="btn btn-xs btn-danger" onclick="return confirm('Yakin Ingin Hapus Data?')">X</a> -->
+                                    <?php }?>
+                                </td>
+                            </tr>
+                            <?php }
+                            } ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div align="center" id="footer">
+                <font style="color: grey;">V.2206.02</font>
+            </div>
+        </div>
+        <div class="" id="load" style="visibility: hidden">
+            <div id="content" class="content bg-secondary" style="opacity: 0.1; position: fixed;"></div>
+            <img src="<?php echo base_url('assets/images/loader.gif');?>" width="80" style="position: fixed;z-index:5;top:45%;left:55%">
+        </div>
+    </div>
+
+            <!-- Modal Tambah Penilaian-->
+            <div class="modal fade" id="tambah-penilaian" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-nobby">
+                            <h5 class="modal-title text-light" id="exampleModalLabel">KONFIRMASI DATA DIRI</h5>
+                            <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <form method="POST" action="<?php echo base_url('pa/simpanPA');?>"> 
+                        <div class="modal-body">
+                            <input hidden type="text" name="kd_jenis" value="<?= $cari[0]->kd_jenis?>">
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <label>CABANG</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control form-control-sm" name="kode_cabang"
+                                    value="<?php echo $data_karyawan[0]->kode_cabang?>"  readonly>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <label>NIK - NAMA</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control form-control-sm" name="niknama"
+                                    value="<?php echo $data_karyawan[0]->nik.' - '.$data_karyawan[0]->nama?>"  readonly>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <label>JENIS</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control form-control-sm" name="jenis" value="<?= $jenis[0]->nm_jenis?>" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <label>JABATAN</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control form-control-sm" name="jabatan" value="<?php echo $data_karyawan[0]->nama_level?>" readonly>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-3">
+                                    <label>STATUS</label>
+                                </div>
+                                <div class="col-md-9">
+                                    <input type="text" class="form-control form-control-sm" name="status" value="<?php if($data_karyawan[0]->status == 'K'){ echo 'KONTRAK'; }elseif($data_karyawan[0]->status =='T'){ echo 'TETAP'; }?>" readonly>
+                                </div>
+                            </div>
+                            <!-- <div class="form-group row">
+                                <div class="col-md-3">
+                                    <label>TUJUAN<font style="color:red"><sup>*</sup></font></label>
+                                </div>
+                                <div class="col-md-9">
+                                    <textarea class="form-control form-control-sm" name="tujuan" required></textarea>
+                                </div>
+                            </div> -->
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <label><font style="color:red"><i>*Untuk Jenis, Periode dan Tujuan PA silakan tanyakan pada HR</i></font></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <input type="submit" class="btn btn-sm btn-success" value="NEXT" onclick="return confirm('Pastikan pengisian sudah sesuai dengan instruksi HR karena data tidak dapat diubah. \n\nYakin Ingin Simpan Data?')">
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- End modal Tambah Penilaian -->
+
+
+            <!-- Modal Info-->
+            <div class="modal fade" id="info-nilai" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header bg-nobby">
+                            <h5 class="modal-title text-light" id="exampleModalLabel">INTERVAL NILAI</h5>
+                            <button type="button" class="close text-light" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="table-responsive rounded pl-3 pr-3 pt-2">
+                            <table class="table table-bordered table-hover table-sm shadow" id="table" style="border: 2px solid !important; font-size: 12px">
+                                <thead>
+                                    <tr>
+                                        <th class="bg-nobby text-light text-center" colspan="2" style="width: 5%; border: 1px solid #000;">KRITERIA NILAI <i class="fas fa-sort"></i></th>
+                                        <th class="bg-nobby text-light text-center" style="width: 5%; border: 1px solid #000;">PREDIKAT <i class="fas fa-sort"></i></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach($interval as $int){ ?>
+                                    <tr>
+                                        <td class="text-center" style="border: 1px solid #000;"><?php echo $int->skor1.' - '.$int->skor;?></td>
+                                        <td class="text-center" style="border: 1px solid #000;"><?php echo $int->nilai?></td>
+                                        <td class="text-center" style="border: 1px solid #000;"><?php echo $int->predikat?></td>
+                                    </tr>
+                                    <?php }?>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- End Modal Info-->
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#nik').select2();
+    }); 
+
+    $(document).ready(function(){
+            $('#cabang').select2();
+        });
+
+    $(function () {
+        $('#table').DataTable({
+            "paging": false,
+            "lengthChange": false,
+            "searching": true,
+            "ordering": true,
+            "info": true,
+            "autoWidth": true
+        });
+    });
+</script>
+
+
+<?php $this->load->view('layout/footer.php')?>
